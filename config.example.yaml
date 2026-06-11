@@ -1,0 +1,30 @@
+# dtk config — all fields shown with their defaults.
+# Copy this file to /etc/dtk/config.yaml and customise.
+
+# listen is the address dtk binds to.
+# Default: ":8080"
+listen: ":8080"
+
+groups:
+  - name: service
+    # host must match the Host header Caddy forwards to dtk.
+    host: service.example.com
+
+    # All containers that belong to this service.
+    # dtk pauses/unpauses them as a unit.
+    containers:
+      - service_app
+      - service_redis
+
+    # target is the upstream URL for forwarded requests.
+    target: http://service_app:9999
+
+    # idle_timeout: pause the group after this period of inactivity.
+    # Accepts Go duration strings: 30m, 1h, 2h30m, …
+    # Default: 30m
+    idle_timeout: 1h
+
+    # wake_delay: wait this long after unpausing before forwarding requests.
+    # Gives containers time to re-initialise.
+    # Default: 3s
+    wake_delay: 5s

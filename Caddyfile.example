@@ -1,0 +1,9 @@
+# Caddyfile.example
+#
+# Caddy configuration for dtk.
+# Caddy terminates TLS and forwards all traffic to dtk on port 8080.
+# dtk then routes by Host header to the correct container group.
+
+service.example.com {
+    reverse_proxy dtk:8080
+}

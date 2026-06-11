@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="5">
+  <title>dtk — Docker Time Keeper</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f13;
+      color: #e2e2e6;
+      margin: 0;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    
+    /* Desktop Table Layout */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #888;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #222;
+    }
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #1a1a22;
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge.running  { background: #14532d; color: #4ade80; }
+    .badge.waking   { background: #713f12; color: #fbbf24; }
+    .badge.pausing  { background: #1e3a5f; color: #60a5fa; }
+    .badge.paused   { background: #1f1f29; color: #888; }
+    
+    .containers { font-size: 0.8rem; color: #aaa; }
+    .containers span {
+      display: inline-block;
+      background: #1a1a22;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      margin: 0.1rem 0.15rem 0.1rem 0;
+      font-family: ui-monospace, monospace;
+    }
+    .ts { font-size: 0.78rem; color: #666; margin-top: 1.5rem; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .action-form { margin: 0; }
+    .btn {
+      border: 1px solid #2f4d7d;
+      background: #111c2e;
+      color: #9fc3ff;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .btn:hover {
+      background: #162844;
+      color: #c4d9ff;
+    }
+    
+    /* Card layout hidden by default */
+    .mobile-cards {
+      display: none;
+    }
+
+    /* Mobile and Tablet Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 0.75rem;
+      }
+      h1 { font-size: 1.2rem; margin-bottom: 0.25rem; }
+      .subtitle { font-size: 0.8rem; margin-bottom: 1rem; }
+      
+      /* Hide table and show card layout */
+      table {
+        display: none;
+      }
+      
+      .mobile-cards {
+        display: block;
+      }
+      
+      .group-card {
+        background: #1a1a22;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: block;
+      }
+      
+      .group-header {
+        margin-bottom: 0.75rem;
+      }
+      
+      .group-name {
+        display: block;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .group-host {
+        display: block;
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.75rem;
+      }
+      
+      .group-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #111;
+        font-size: 0.85rem;
+      }
+      
+      .group-row:last-child {
+        border-bottom: none;
+      }
+      
+      .group-label {
+        font-weight: 600;
+        color: #888;
+        margin-right: 0.5rem;
+        min-width: 80px;
+      }
+      
+      .group-value {
+        text-align: right;
+        flex: 1;
+      }
+      
+      .group-containers {
+        margin-top: 0.75rem;
+      }
+      
+      .containers span {
+        display: inline-block;
+        background: #111;
+        border-radius: 3px;
+        padding: 0.2rem 0.35rem;
+        margin: 0.2rem 0.15rem 0.2rem 0;
+        font-size: 0.7rem;
+        font-family: ui-monospace, monospace;
+      }
+      
+      .group-action {
+        margin-top: 0.75rem;
+      }
+      
+      .btn {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+      h1 { font-size: 1.1rem; }
+      .subtitle { font-size: 0.75rem; }
+      
+      .group-card {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .group-row {
+        flex-direction: column;
+        padding: 0.4rem 0;
+      }
+      
+      .group-label {
+        margin-right: 0;
+        min-width: auto;
+        margin-bottom: 0.2rem;
+      }
+      
+      .group-value {
+        text-align: left;
+      }
+      
+      .badge {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>dtk — Docker Time Keeper</h1>
+  <p class="subtitle">Auto-refreshes every 5 seconds &middot; Updated at {{.Timestamp}}</p>
+
+  <!-- Desktop Table View -->
+  <table>
+    <thead>
+      <tr>
+        <th>Group</th>
+        <th>State</th>
+        <th>Containers</th>
+        <th>Last Request</th>
+        <th>Idle Timeout</th>
+        <th>Wake Delay</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Groups}}
+      <tr>
+        <td>
+          <strong>{{.Name}}</strong><br>
+          <span style="font-size:0.8rem;color:#666;">{{.Host}}</span>
+        </td>
+        <td><span class="badge {{stateClass .State}}">{{.State}}</span></td>
+        <td class="containers">
+          {{range .Containers}}<span>{{.}}</span>{{end}}
+        </td>
+        <td>{{since .LastRequest}}</td>
+        <td>{{humanDuration .IdleTimeout}}</td>
+        <td>{{humanDuration .WakeDelay}}</td>
+        <td>
+          <form class="action-form" method="post" action="/_dtk/restart">
+            <input type="hidden" name="host" value="{{.Host}}">
+            <button type="submit" class="btn">Restart</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+
+  <!-- Mobile Card View -->
+  <div class="mobile-cards">
+    {{range .Groups}}
+    <div class="group-card">
+      <div class="group-header">
+        <span class="group-name">{{.Name}}</span>
+        <span class="group-host">{{.Host}}</span>
+      </div>
+      <div class="group-row">
+        <span class="group-label">State</span>
+        <span class="group-value"><span class="badge {{stateClass .State}}">{{.State}}</span></span>
+      </div>
+      <div class="group-row">
+        <span class="group-label">Last Request</span>
+        <span class="group-value">{{since .LastRequest}}</span>
+      </div>
+      <div class="group-row">
+        <span class="group-label">Idle Timeout</span>
+        <span class="group-value">{{humanDuration .IdleTimeout}}</span>
+      </div>
+      <div class="group-row">
+        <span class="group-label">Wake Delay</span>
+        <span class="group-value">{{humanDuration .WakeDelay}}</span>
+      </div>
+      {{if .Containers}}
+      <div class="group-containers">
+        <div style="color: #888; font-size: 0.85rem; margin-bottom: 0.4rem;">Containers</div>
+        <div class="containers">
+          {{range .Containers}}<span>{{.}}</span>{{end}}
+        </div>
+      </div>
+      {{end}}
+      <div class="group-action">
+        <form class="action-form" method="post" action="/_dtk/restart">
+          <input type="hidden" name="host" value="{{.Host}}">
+          <button type="submit" class="btn">Restart</button>
+        </form>
+      </div>
+    </div>
+    {{end}}
+  </div>
+
+  <p class="ts">dtk &middot; <a href="https://github.com/ylecuyer/dtk">github.com/ylecuyer/dtk</a></p>
+</body>
+</html>
