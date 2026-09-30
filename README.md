@@ -107,6 +107,8 @@ A live status dashboard is available at `/_dtk/status` (on any host):
 http://localhost:8080/_dtk/status
 ```
 
+![dtk status dashboard](status.png)
+
 It shows each group's current state, containers, last request time, and idle timeout. The page auto-refreshes every 5 seconds.
 
 ### Restart a group
